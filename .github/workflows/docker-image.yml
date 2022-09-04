@@ -6,6 +6,7 @@ on:
     paths:
     - 'Dockerfile'
     - 'get_media_from_library.sh'
+  workflow_dispatch:
   repository_dispatch:
     types: [build-image]
 
