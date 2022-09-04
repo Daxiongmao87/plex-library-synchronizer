@@ -1,0 +1,27 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+    - 'Dockerfile'
+    - 'get_media_from_library.sh'
+  repository_dispatch:
+    types: [build-image]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Log in to Dockerhub
+      run: docker login -u daxiongmao87 -p ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Build and Push Docker image
+      run: |
+        TAG=build-$(date +'%Y.%m.%d.%H%M%S') && \
+        docker build . --file Dockerfile --tag daxiongmao87/plex-library-synchronizer:$TAG && \
+        docker push daxiongmao87/plex-library-synchronizer:$TAG && \
+        docker tag daxiongmao87/plex-library-synchronizer:$TAG daxiongmao87/plex-library-synchronizer:latest && \
+        docker push daxiongmao87/plex-library-synchronizer:latest
