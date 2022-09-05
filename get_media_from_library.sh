@@ -38,8 +38,8 @@ while true; do
   IFS=',' read -r -a OUTPUTS <<< "${OUTPUTS_STRING}"
   for j in $(seq 0 $(( ${#LIBRARIES[@]}-1 ))); do
     SERVER_LIBRARY="$(echo ${LIBRARIES[$j]} | xargs)"
-    SERVER="$(echo ${SERVER_LIBRARY%:*} | xargs)"
-    LIBRARY="$(echo ${SERVER_LIBRARY##*:} | xargs)"
+    SERVER="$(echo ${SERVER_LIBRARY%;*} | xargs)"
+    LIBRARY="$(echo ${SERVER_LIBRARY##*;} | xargs)"
     echo $(timestamp) "------------------------------"
     echo $(timestamp) "Processing Library: $LIBRARY"
     echo $(timestamp) "From Server: $SERVER"
