@@ -1,7 +1,7 @@
 # Plex Library Synchronizer
 ## Links
 - [Plex Library Synchronizer - Dockerfile Repository](https://github.com/Daxiongmao87/plex-library-synchronizer)
-- [Plex Library Synchronizer - Dockerhub](https://hub.docker.com/repository/docker/daxiongmao87/plex-library-synchronizer)
+- [Plex Library Synchronizer - Dockerhub](https://hub.docker.com/r/daxiongmao87/plex-library-synchronizer)
 - [Plexmedia Downloader - Repository](https://github.com/Daxiongmao87/plexmedia-downloader)
 ## Description
 This is more or less a wrapper around [plexmedia-downloader](https://github.com/Daxiongmao87/plexmedia-downloader), originally authored by [codedninja](https://github.com/codedninja/plexmedia-downloader).
