@@ -56,17 +56,24 @@ while true; do
             contains("'"$SERVER"'")) |
           .connections
           ')
+      if [[ -z $CONNECTIONS ]]; then
+        echo $(timestamp) "Server does not exist with the name: $SERVER"
+        continue
+      fi 
       LOCAL_CONNECTIONS=( $(echo "$CONNECTIONS" | jq -r '.[] | select(.relay==false) | to_entries | map(select(.key | match("address";"i"))) | map(.value) | .[]') )
       LOCAL_PORTS=( $(echo "$CONNECTIONS" | jq -r '.[] | select(.relay==false) | to_entries | map(select(.key | match("port";"i"))) | map(.value) | .[]') )
       echo $(timestamp) "Trying to connect to LOCAL connections for server: $SERVER"
       for i in $(seq 0 $(( ${#LOCAL_CONNECTIONS[@]}-1 ))); do
         CONNECTION=$(echo "${LOCAL_CONNECTIONS[$i]}")
         PORT=$(echo "${LOCAL_PORTS[$i]}")
+        echo $(timestamp) "Attempting connection [30s] with: http://$CONNECTION:$PORT ..."
         CONNECT_RESULT=$(curl --connect-timeout 30 -s "http://$CONNECTION:$PORT" > /dev/null && echo "Success")
         if [[ "$CONNECT_RESULT" == "Success" ]]; then
           echo $(timestamp) "LOCAL Connection successful to server: $SERVER"
           PLEX_URL="http://$CONNECTION:$PORT"
           break;
+        else
+          echo $(timestamp) "Attempt failed for connection: http://$CONNECTION:$PORT"
         fi
       done
       if [[ -z "${PLEX_URL}" ]]; then
@@ -74,11 +81,14 @@ while true; do
         echo $(timestamp) "Trying to connect to REMOTE connections for server: $SERVER"
         RELAY_CONNECTIONS=$(echo "$CONNECTIONS" | jq -r '.[] | select(.relay==true) | to_entries | map(select(.key | match("uri";"i"))) | map(.value) | .[]')
         for CONNECTION in ${RELAY_CONNECTIONS}; do
+          echo $(timestamp) "Attempting connection [30s] with: $CONNECTION ..."
           CONNECT_RESULT=$(curl --connect-timeout 30 -s "$CONNECTION" > /dev/null && echo "Success")
           if [[ "$CONNECT_RESULT" == "Success" ]]; then
             echo $(timestamp) "REMOTE Connection successful to server: $SERVER"
             PLEX_URL=$CONNECTION
             break;
+          else
+            echo $(timestamp) "Attempt failed for connection: http://$CONNECTION:$PORT"
           fi
         done
       fi
@@ -107,7 +117,6 @@ while true; do
       echo $(timestamp) "Library found with the name: $LIBRARY"
       LIST_MEDIA_URL="${PLEX_URL}/library/sections/${LIBRARY_KEY}/all?${PLEX_TOKEN_SCHEME}"
       MEDIAS="$(curl -s ${LIST_MEDIA_URL})"
-
       MEDIAS_JSON=$(echo ${MEDIAS} | xq .MediaContainer)
       NUM_MEDIAS=$(echo "${MEDIAS_JSON}" | jq -r '."@size"')
       echo $(timestamp) "Searching for media in library: $LIBRARY"
